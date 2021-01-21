@@ -1,9 +1,7 @@
-# nodemysql
-nodemysql
 node项目
 
-Project setup
+安装依赖
 npm install
 
-Compiles and hot-reloads for development
+运行项目
 npm run dev
