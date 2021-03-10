@@ -1,21 +1,22 @@
 //登陆 注册
 const express = require("express");
-const users = express.Router();
+const usersRouter = express.Router();
 const bcrypt = require("bcryptjs");
-
 const User = require("../models/users.js");
+// SQl连接方式的查询
+const mysqldb = require("../mysqldb/mysqldb.js");
 
-users.get("/test",(req,res) =>{
+usersRouter.get("/test",(req,res) =>{
 	res.send({msg:"测试"})
 })
 
 // 登录
-users.post("/login",(req,res) =>{
+usersRouter.post("/login",(req,res) =>{
 	
 })
 
 // 注册
-users.post("/register",(req,res) =>{
+usersRouter.post("/register",(req,res) =>{
 	const now = new Date();
 	const userData = {
 		name:req.body.name,
@@ -23,7 +24,6 @@ users.post("/register",(req,res) =>{
 		password:req.body.password,
 		created:now
 	}
-	
 	//存之前 先找
 	User.findOne({ where: {email: req.body.email }}).then((user) =>{
 		if(!user){
@@ -31,19 +31,33 @@ users.post("/register",(req,res) =>{
 			bcrypt.hash(req.body.password,10, (err,hash) =>{
 				userData.password = hash;
 				User.create(userData).then((user) =>{
-					console.log(user);
-					res.json("注册成功");
+					res.json({msg:"注册成功"});
 				}).catch((err) =>{
-					res.send("error" + err);
+					res.json({msg:err});
 				})
 			})
 		}else{
-			res.json("数据已存在");
+			res.json({msg:"数据已存在"});
 		}
 	}).catch((err) =>{
-		res.json("error:" + err);
+		res.json({msg:err});
 	})
 })
-module.exports = users;
+
+// sequelize 查询表中所有数据
+usersRouter.get("/list",async(ctx, res) =>{
+	const users = await User.findAll();
+	res.json({data:users})
+})
+// SQL查询所有内容
+usersRouter.get('/user', (req, res) => {
+  let sql = 'SELECT * FROM users';
+  mysqldb.query(sql, (err, result) => {
+    if (err) throw err;
+    res.json(result);
+  });
+});
+
+module.exports = usersRouter;
 
 

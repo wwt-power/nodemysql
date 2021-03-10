@@ -5,7 +5,7 @@ const mysqldb = mysql.createConnection({
 	host:"localhost",
 	user:"root",
 	password:"root",
-	database:"nodemysql"
+	database:"nodesql_login"
 }) 
 // 链接
 mysqldb.connect();
