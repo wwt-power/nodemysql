@@ -5,6 +5,10 @@ const bcrypt = require("bcryptjs");
 const User = require("../models/users.js");
 // SQl连接方式的查询
 const mysqldb = require("../mysqldb/mysqldb.js");
+//定义到环境变量
+process.env.SECRET_KEY = 'secret';
+// jsonwebtoken
+const jwt = require('jsonwebtoken');
 
 usersRouter.get("/test",(req,res) =>{
 	res.send({msg:"测试"})
@@ -12,9 +16,31 @@ usersRouter.get("/test",(req,res) =>{
 
 // 登录
 usersRouter.post("/login",(req,res) =>{
-	
+	User.findOne({ where: {email: req.body.email }}).then(async(result) =>{
+		if(result){
+			//密码匹配
+			if (await bcrypt.compare(req.body.password, result.password)) {
+				//生成token
+				let token = jwt.sign(result.dataValues, process.env.SECRET_KEY, { expiresIn: 1440 });// expiresIn过期时间
+				//https://jwt.io    解析token
+				res.status(200).json({
+					msg:"登陆成功！",
+					data:"",
+					token:token
+				});
+			}else{
+				res.status(400).json({ msg: "密码不正确！" })
+				console.log("密码不正确");
+			}
+		}else{
+			res.status(400).json({ msg: "邮箱不存在！" })
+			console.log("邮箱不存在");
+		}
+	}).catch((err) =>{
+		res.status(400).json({ error: err })
+		console.log("error");
+	})
 })
-
 // 注册
 usersRouter.post("/register",(req,res) =>{
 	const now = new Date();
@@ -25,25 +51,24 @@ usersRouter.post("/register",(req,res) =>{
 		created:now
 	}
 	//存之前 先找
-	User.findOne({ where: {email: req.body.email }}).then((user) =>{
-		if(!user){
+	User.findOne({ where: {email: req.body.email }}).then((result) =>{
+		if(!result){
 			// 加密
 			bcrypt.hash(req.body.password,10, (err,hash) =>{
 				userData.password = hash;
 				User.create(userData).then((user) =>{
-					res.json({msg:"注册成功"});
+					res.status(200).json({ data: req.body.email,"msg":"注册成功" });
 				}).catch((err) =>{
-					res.json({msg:err});
+					res.status(400).json({ error: err })
 				})
 			})
 		}else{
-			res.json({msg:"数据已存在"});
+			res.status(400).json({ data: "用户已存在!" })
 		}
 	}).catch((err) =>{
-		res.json({msg:err});
+		res.status(400).json({ error: '注册失败,请检查数据是否完整' })
 	})
 })
-
 // sequelize 查询表中所有数据
 usersRouter.get("/list",async(ctx, res) =>{
 	const users = await User.findAll();
@@ -57,7 +82,6 @@ usersRouter.get('/user', (req, res) => {
     res.json(result);
   });
 });
-
 module.exports = usersRouter;
 
 
