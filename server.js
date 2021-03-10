@@ -13,10 +13,11 @@ app.get("/",(req,res)=>{
 	res.send(server);
 })
 
-const Users = require("./src/routers/Users.js");
-app.use("/api/v1" , Users);
+// 登录注册接口
+const usersRouter = require("./src/routers/Users.js");
+app.use("/api/v1" , usersRouter);
 
-
+// 监听端口号
 var server = app.listen(port,() =>{
 	console.log("启动端口为 "+ port + "的端口 ");
 })
