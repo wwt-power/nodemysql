@@ -9,9 +9,7 @@ const User = require("../src/models/users.js");
 
 module.exports = passport =>{
 	passport.use(new JwtStrategy(opts, function(jwt_payload, done) {
-		// console.log(jwt_payload);
 		User.findOne({ where: {id: jwt_payload.id }}).then(user =>{
-			// console.log(user);
 			if(user){
 				return done(null,user);
 			}
