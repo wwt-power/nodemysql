@@ -9,6 +9,8 @@ const mysqldb = require("../mysqldb/mysqldb.js");
 process.env.SECRET_KEY = 'secret';
 // jsonwebtoken
 const jwt = require('jsonwebtoken');
+// passport
+const passport = require("passport");
 
 usersRouter.get("/test",(req,res) =>{
 	res.send({msg:"测试"})
@@ -26,7 +28,7 @@ usersRouter.post("/login",(req,res) =>{
 				res.status(200).json({
 					msg:"登陆成功！",
 					data:"",
-					token:token
+					token:"Bearer " + token
 				});
 			}else{
 				res.status(400).json({ msg: "密码不正确！" })
@@ -82,6 +84,12 @@ usersRouter.get('/user', (req, res) => {
     res.json(result);
   });
 });
+
+// 验证token
+usersRouter.get('/current',passport.authenticate("jwt",{session:false}),(req, res) => {
+	console.log(req);
+});
+
 module.exports = usersRouter;
 
 
