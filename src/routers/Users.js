@@ -11,6 +11,8 @@ process.env.SECRET_KEY = 'secret';
 const jwt = require('jsonwebtoken');
 // passport
 const passport = require("passport");
+// validator
+const validateLoginInput = require(".././validation/login")
 
 usersRouter.get("/test",(req,res) =>{
 	res.send({msg:"测试"})
@@ -18,6 +20,13 @@ usersRouter.get("/test",(req,res) =>{
 
 // 登录
 usersRouter.post("/login",(req,res) =>{
+	
+	const {errors,isValid} = validateLoginInput(req.body);
+	
+	if(!isValid){
+		return res.status(400).json(errors);
+	}
+	
 	User.findOne({ where: {email: req.body.email }}).then(async(result) =>{
 		if(result){
 			//密码匹配
