@@ -3,9 +3,21 @@ var JwtStrategy = require('passport-jwt').Strategy,
 var opts = {}
 opts.jwtFromRequest = ExtractJwt.fromAuthHeaderAsBearerToken();
 opts.secretOrKey = 'secret';
+// 数据模型
+const db = require("../src/database/db.js");
+const User = require("../src/models/users.js");
 
 module.exports = passport =>{
 	passport.use(new JwtStrategy(opts, function(jwt_payload, done) {
-		console.log(jwt_payload);
+		// console.log(jwt_payload);
+		User.findOne({ where: {id: jwt_payload.id }}).then(user =>{
+			// console.log(user);
+			if(user){
+				return done(null,user);
+			}
+			return done(null,false);
+		}).catch(err =>{
+			console.log(err);
+		})
 	}));
 }
