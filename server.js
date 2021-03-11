@@ -4,14 +4,16 @@ const app = express();
 const bodyParser = require("body-parser");
 // 端口号
 const port = process.env.PORT || 3000;
+// 引入passport
+const passport = require("passport");
 
+// 使用body-parser 中间件
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({extended: false}));
 
-// 路由
-app.get("/",(req,res)=>{
-	res.send(server);
-})
+// 初始化passport
+app.use(passport.initialize());
+require("./config/passport.js")(passport);
 
 // 登录注册接口
 const usersRouter = require("./src/routers/Users.js");
