@@ -87,7 +87,11 @@ usersRouter.get('/user', (req, res) => {
 
 // 验证token
 usersRouter.get('/current',passport.authenticate("jwt",{session:false}),(req, res) => {
-	console.log(req);
+	res.json({
+		id:req.user.id,
+		name:req.user.name,
+		email:req.user.email
+	});
 });
 
 module.exports = usersRouter;
